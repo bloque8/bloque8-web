@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BLOQUE8 | Empleado IA para autónomos</title>
+  <meta name="description" content="BLOQUE8: el empleado IA privado para autónomos. Presupuestos, facturas, clientes, web y automatizaciones desde una sola conversación." />
+  <style>
+    :root{
+      --bg:#070707;
+      --bg-2:#0d0d0f;
+      --card:#111113;
+      --card-2:#151518;
+      --text:#f7f7f7;
+      --muted:#b9b9bf;
+      --line:rgba(255,255,255,.08);
+      --red:#e10600;
+      --red-2:#ff3b30;
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      --radius: 26px;
+      --max: 1180px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(800px 500px at 50% 105%, rgba(225,6,0,.22), transparent 55%),
+        radial-gradient(500px 300px at 15% 10%, rgba(225,6,0,.10), transparent 65%),
+        linear-gradient(180deg, #050505 0%, #090909 35%, #070707 100%);
+      color:var(--text);
+      overflow-x:hidden;
+    }
+
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+
+    .noise{
+      position:fixed; inset:0; pointer-events:none; opacity:.045; mix-blend-mode:soft-light;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
+      z-index:0;
+    }
+
+    .wrap{
+      position:relative;
+      z-index:1;
+      width:min(var(--max), calc(100% - 40px));
+      margin:0 auto;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter: blur(18px);
+      background: rgba(7,7,7,.62);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      min-height:78px;
+    }
+
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:15px;
+    }
+
+    .logo-mark{
+      width:40px;height:40px;border-radius:14px;
+      display:grid;place-items:center;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,.25), transparent 20%),
+        linear-gradient(135deg, rgba(225,6,0,1), rgba(255,61,48,.86));
+      box-shadow: 0 0 0 1px rgba(255,255,255,.05), 0 12px 30px rgba(225,6,0,.28);
+      position:relative;
+      overflow:hidden;
+    }
+    .logo-mark:before{
+      content:"";
+      position:absolute; inset:10px;
+      border:2px solid rgba(255,255,255,.85);
+      border-radius:9px;
+      transform:rotate(15deg);
+      opacity:.85;
+    }
+    .logo-mark:after{
+      content:"";
+      position:absolute; inset:16px 13px 13px 16px;
+      border-left:2px solid rgba(255,255,255,.85);
+      border-bottom:2px solid rgba(255,255,255,.85);
+      transform:skew(-10deg);
+      opacity:.85;
+    }
+
+    .logo-img{
+      width:40px;
+      height:40px;
+      object-fit:cover;
+      border-radius:12px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 12px 30px rgba(225,6,0,.28);
+      filter: drop-shadow(0 0 16px rgba(225,6,0,.35));
+      background:#fff;
+    }
+
+    .nav-links{
+      display:flex; gap:22px; align-items:center;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .nav-links a{transition:.2s ease}
+    .nav-links a:hover{color:var(--text)}
+
+    .nav-cta{
+      display:flex; align-items:center; gap:12px;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:14px 20px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      font-weight:700;
+      transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{
+      background: linear-gradient(135deg, var(--red), var(--red-2));
+      box-shadow: 0 16px 36px rgba(225,6,0,.24);
+      border-color: rgba(255,255,255,.06);
+    }
+    .btn-primary:hover{box-shadow:0 18px 44px rgba(225,6,0,.32)}
+    .btn-ghost{
+      background:rgba(255,255,255,.03);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero{
+      position:relative;
+      padding:72px 0 28px;
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.08fr .92fr;
+      gap:34px;
+      align-items:center;
+      min-height: calc(100vh - 78px);
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:999px;
+      background:rgba(255,255,255,.03);
+      color:#fff;
+      font-size:13px;
+      letter-spacing:.02em;
+      margin-bottom:18px;
+    }
+    .eyebrow .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:var(--red);
+      box-shadow:0 0 0 4px rgba(225,6,0,.18);
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(44px, 6vw, 84px);
+      line-height:.95;
+      letter-spacing:-.05em;
+      text-wrap:balance;
+    }
+    .accent{
+      background: linear-gradient(180deg, #fff 0%, #f3f3f3 60%, #d9d9d9 100%);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
+    .accent-red{
+      color:var(--red-2);
+    }
+
+    .lead{
+      margin:20px 0 0;
+      max-width: 620px;
+      color:var(--muted);
+      font-size:clamp(17px, 1.5vw, 20px);
+      line-height:1.7;
+    }
+
+    .hero-actions{
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-top:28px;
+    }
+
+    .meta-row{
+      display:flex;
+      gap:22px;
+      flex-wrap:wrap;
+      margin-top:24px;
+      color:#d7d7dc;
+      font-size:14px;
+    }
+    .meta-row span{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .meta-row i{
+      width:8px;height:8px;border-radius:50%;
+      background:var(--red);
+      display:inline-block;
+      box-shadow:0 0 0 4px rgba(225,6,0,.12);
+    }
+
+    .mock{
+      position:relative;
+      min-height: 650px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .glow{
+      position:absolute;
+      inset:auto auto 12% 50%;
+      width:520px;
+      height:520px;
+      transform:translateX(-50%);
+      background: radial-gradient(circle, rgba(225,6,0,.34) 0%, rgba(225,6,0,.12) 22%, rgba(225,6,0,.03) 44%, transparent 68%);
+      filter: blur(14px);
+      pointer-events:none;
+    }
+
+    .device{
+      position:relative;
+      width:min(100%, 560px);
+      border-radius:34px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.03)),
+        linear-gradient(180deg, #121214, #0b0b0c);
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+      padding:18px;
+    }
+
+    .device-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:16px;
+      color:#afafb5;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+    }
+
+    .window-dots{
+      display:flex; gap:8px;
+    }
+    .window-dots span{
+      width:10px;height:10px;border-radius:50%;
+      background:rgba(255,255,255,.18);
+    }
+    .window-dots span:first-child{background:#ff5f57}
+    .window-dots span:nth-child(2){background:#febc2e}
+    .window-dots span:nth-child(3){background:#28c840}
+
+    .panel{
+      border-radius:28px;
+      background:
+        radial-gradient(circle at top right, rgba(225,6,0,.16), transparent 28%),
+        linear-gradient(180deg, #121214 0%, #0c0c0d 100%);
+      border:1px solid rgba(255,255,255,.07);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:0;
+    }
+
+    .tabs{
+      display:flex;
+      gap:8px;
+      padding:14px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      background:rgba(255,255,255,.02);
+      flex-wrap:wrap;
+    }
+    .tab{
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.04);
+      color:#d8d8dd;
+      font-size:13px;
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .tab.active{
+      background: rgba(225,6,0,.18);
+      color:#fff;
+      border-color: rgba(225,6,0,.35);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
+    }
+
+    .panel-body{
+      padding:18px;
+      display:grid;
+      gap:14px;
+    }
+
+    .chatline{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      color:#dfe0e6;
+      font-size:14px;
+      line-height:1.55;
+    }
+    .bubble{
+      max-width: 92%;
+      padding:14px 16px;
+      border-radius:18px;
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.07);
+    }
+    .bubble.user{
+      background: rgba(225,6,0,.14);
+      border-color: rgba(225,6,0,.22);
+    }
+    .bubble strong{
+      display:block;
+      margin-bottom:4px;
+      color:#fff;
+    }
+
+    .mini-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:12px;
+      margin-top:6px;
+    }
+
+    .mini-card{
+      border-radius:22px;
+      padding:15px;
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .mini-card h4{
+      margin:0 0 8px;
+      font-size:14px;
+      letter-spacing:-.02em;
+    }
+    .mini-card p{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    section{
+      padding: 26px 0 16px;
+    }
+
+    .section-title{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:24px;
+    }
+    .section-title h2{
+      margin:0;
+      font-size:clamp(28px, 4vw, 46px);
+      letter-spacing:-.04em;
+      line-height:1.02;
+    }
+    .section-title p{
+      margin:0;
+      max-width:560px;
+      color:var(--muted);
+      line-height:1.65;
+      font-size:15px;
+    }
+
+    .grid-services{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:16px;
+    }
+    .service{
+      position:relative;
+      padding:22px;
+      border-radius:var(--radius);
+      background:
+        radial-gradient(400px 180px at 50% 0%, rgba(225,6,0,.12), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+      min-height: 190px;
+    }
+    .service:after{
+      content:"";
+      position:absolute; inset:auto 0 0 0;
+      height:2px;
+      background: linear-gradient(90deg, transparent, rgba(225,6,0,.8), transparent);
+      opacity:.35;
+    }
+    .service .icon{
+      width:44px;height:44px;border-radius:14px;
+      display:grid;place-items:center;
+      background: rgba(225,6,0,.14);
+      color:#fff;
+      border:1px solid rgba(225,6,0,.24);
+      margin-bottom:16px;
+      font-size:18px;
+    }
+    .service h3{
+      margin:0 0 10px;
+      font-size:20px;
+      letter-spacing:-.03em;
+    }
+    .service p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.65;
+      font-size:14px;
+    }
+
+    .split{
+      display:grid;
+      grid-template-columns: 1.02fr .98fr;
+      gap:18px;
+      align-items:stretch;
+    }
+
+    .panel-card{
+      border-radius: calc(var(--radius) + 4px);
+      background:
+        radial-gradient(600px 260px at 30% 0%, rgba(225,6,0,.12), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow);
+      padding:26px;
+    }
+
+    .checklist{
+      display:grid;
+      gap:14px;
+      margin-top:18px;
+    }
+    .check{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      color:#dde0e6;
+      line-height:1.55;
+      font-size:15px;
+    }
+    .check .mark{
+      width:22px;height:22px;border-radius:50%;
+      display:grid;place-items:center;
+      background: rgba(225,6,0,.16);
+      color:#fff;
+      border:1px solid rgba(225,6,0,.3);
+      flex:0 0 auto;
+      margin-top:2px;
+    }
+
+    .quote{
+      margin-top:16px;
+      padding:16px 18px;
+      border-radius:20px;
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+      color:#f2f2f4;
+      font-size:14px;
+      line-height:1.65;
+    }
+    .quote strong{color:var(--red-2)}
+
+    .steps{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:16px;
+    }
+    .step{
+      padding:20px;
+      border-radius:var(--radius);
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.07);
+    }
+    .step .num{
+      display:inline-flex;
+      margin-bottom:12px;
+      padding:8px 12px;
+      border-radius:999px;
+      background: rgba(225,6,0,.14);
+      color:#fff;
+      border:1px solid rgba(225,6,0,.22);
+      font-size:13px;
+      font-weight:700;
+    }
+    .step h3{
+      margin:0 0 8px;
+      font-size:18px;
+      letter-spacing:-.02em;
+    }
+    .step p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.65;
+      font-size:14px;
+    }
+
+    .mission{
+      padding-top: 8px;
+    }
+    .mission .panel-card{
+      padding:28px;
+    }
+    .mission p{
+      color:#d7d7dc;
+      line-height:1.9;
+      font-size:16px;
+      margin:0;
+      max-width: 1060px;
+    }
+
+    .cta{
+      position:relative;
+      overflow:hidden;
+      margin: 22px 0 36px;
+    }
+    .cta .panel-card{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:22px;
+      flex-wrap:wrap;
+      background:
+        radial-gradient(700px 220px at 18% 0%, rgba(225,6,0,.22), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    }
+    .cta h2{margin:0 0 8px;font-size:clamp(28px, 4vw, 42px);line-height:1.05;letter-spacing:-.04em}
+    .cta p{margin:0;color:var(--muted);line-height:1.7;max-width:700px}
+    .cta-actions{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+
+    footer{
+      padding:26px 0 40px;
+      color:#8b8b92;
+      font-size:13px;
+      border-top:1px solid rgba(255,255,255,.06);
+    }
+    .footer-inner{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    @media (max-width: 980px){
+      .hero-grid,.split,.grid-services,.steps{
+        grid-template-columns:1fr;
+      }
+      .hero{
+        padding-top: 44px;
+      }
+      .hero-grid{
+        min-height:auto;
+      }
+      .mock{
+        min-height: 560px;
+      }
+      .nav-links{display:none}
+      .section-title{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+    }
+
+    @media (max-width: 640px){
+      .wrap{width:min(100% - 24px, var(--max))}
+      .nav{min-height:68px}
+      .btn{width:100%}
+      .nav-cta{width:100%}
+      .nav-cta .btn{width:auto; flex:1}
+      .hero{padding-top:28px}
+      h1{font-size:40px}
+      .lead{font-size:16px}
+      .service,.step,.panel-card{padding:18px}
+      .mini-grid{grid-template-columns:1fr}
+      .cta .panel-card{padding:20px}
+    }
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+
+  <div class="topbar">
+    <div class="wrap nav">
+      <a class="brand" href="#inicio" aria-label="BLOQUE8 inicio">
+        <img class="logo-img" src="./logo.jpeg" alt="BLOQUE8">
+        <span>BLOQUE8</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Navegación principal">
+        <a href="#servicios">Servicios</a>
+        <a href="#empleado">Empleado IA</a>
+        <a href="#mision">Misión</a>
+        <a href="#como-funciona">Cómo funciona</a>
+      </nav>
+
+      <div class="nav-cta">
+        <a class="btn btn-ghost" href="tel:+34667123558">Llamar</a>
+        <a class="btn btn-primary" href="https://wa.me/34667123558" target="_blank" rel="noopener">Quiero mi demo</a>
+      </div>
+    </div>
+  </div>
+
+  <main id="inicio" class="wrap">
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow"><span class="dot"></span> IA privada para autónomos y pequeñas empresas</div>
+          <h1><span class="accent">Tu negocio</span><br><span class="accent-red">funcionando con un empleado IA</span></h1>
+          <p class="lead">
+            Haz presupuestos, responde clientes, gestiona facturas, actualiza tu web y organiza tu día a día desde una sola conversación.
+            BLOQUE8 te ahorra tiempo sin complicarte con mil herramientas.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="https://wa.me/34667123558" target="_blank" rel="noopener">Ver demo en WhatsApp</a>
+            <a class="btn btn-ghost" href="#servicios">Ver servicios</a>
+          </div>
+          <div class="meta-row">
+            <span><i></i> Privacidad total</span>
+            <span><i></i> Instalación adaptada</span>
+            <span><i></i> Pensado para vender más rápido</span>
+          </div>
+        </div>
+
+        <div class="mock" aria-hidden="true">
+          <div class="glow"></div>
+          <div class="device">
+            <div class="device-top">
+              <div class="window-dots"><span></span><span></span><span></span></div>
+              <div>Panel BLOQUE8</div>
+            </div>
+            <div class="panel">
+              <div class="tabs">
+                <div class="tab active">Empleado IA</div>
+                <div class="tab">Presupuestos</div>
+                <div class="tab">Web</div>
+                <div class="tab">Clientes</div>
+              </div>
+              <div class="panel-body">
+                <div class="chatline">
+                  <div class="bubble user">
+                    <strong>Tú:</strong>
+                    Haz un presupuesto para una instalación completa en un local de 120m².
+                  </div>
+                </div>
+                <div class="chatline">
+                  <div class="bubble">
+                    <strong>BLOQUE8:</strong>
+                    He preparado el presupuesto, el email de envío y el resumen para el cliente. También puedo adaptarlo a tu plantilla y enviarlo con tu marca.
+                  </div>
+                </div>
+                <div class="mini-grid">
+                  <div class="mini-card">
+                    <h4>Presupuesto listo</h4>
+                    <p>Generación automática con tu formato, tus precios y tu estilo comercial.</p>
+                  </div>
+                  <div class="mini-card">
+                    <h4>Respuesta al cliente</h4>
+                    <p>Mensajes profesionales, rápidos y con el tono de tu negocio.</p>
+                  </div>
+                  <div class="mini-card">
+                    <h4>Web editable</h4>
+                    <p>Cambios de textos, servicios y bloques desde la misma conversación.</p>
+                  </div>
+                  <div class="mini-card">
+                    <h4>Privacidad local</h4>
+                    <p>Diseñado para trabajar en tu entorno, sin complicarte con mil plataformas.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="servicios">
+      <div class="section-title">
+        <h2>Servicios pensados para quitarte trabajo de encima</h2>
+        <p>No vendemos “IA por vender”. Vendemos tiempo, orden y menos lío diario. Todo con una estética clara, limpia y directa.</p>
+      </div>
+<section class="section">
+  <h2>Reparación y mantenimiento de equipos</h2>
+
+  <div class="features">
+
+    <div class="card">
+      <h3>Limpieza y mantenimiento</h3>
+      <p>
+        Mejoramos temperatura, rendimiento y estabilidad de tu equipo
+        con limpieza interna y optimización completa.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Cambio de pantallas y baterías</h3>
+      <p>
+        Sustitución de pantallas, baterías y componentes dañados
+        en portátiles, móviles y ordenadores.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Recogida y envío</h3>
+      <p>
+        Puedes traer tu equipo o enviárnoslo para diagnóstico,
+        reparación y mantenimiento.
+      </p>
+    </div>
+
+  </div>
+
+  <div class="center" style="margin-top:40px;">
+    <a class="btn"
+       href="https://wa.me/34667123558?text=Hola%20quiero%20reparar%20un%20equipo"
+       target="_blank">
+       Solicitar reparación
+    </a>
+  </div>
+
+</section>
+      <div class="grid-services">
+        <article class="service">
+          <div class="icon">01</div>
+          <h3>Consultoría estratégica</h3>
+          <p>Analizamos tu negocio, detectamos cuellos de botella y definimos qué automatizar primero para notar el cambio rápido.</p>
+        </article>
+        <article class="service">
+          <div class="icon">01</div>
+          <h3>Reparación y Mantenimiento</h3>
+          <p> Realizamos reparación y mantenimiento de ordenadores, portátiles y móviles, incluyendo cambios de batería, pantallas, optimización de rendimiento, limpieza interna y solución de fallos técnicos.</p>
+        </article>
+
+        <article class="service">
+          <div class="icon">02</div>
+          <h3>Empleado IA privado</h3>
+          <p>Un asistente que te ayuda con presupuestos, clientes, emails, documentos y tareas repetitivas desde una sola interfaz.</p>
+        </article>
+
+        <article class="service">
+          <div class="icon">03</div>
+          <h3>Presupuestos y facturas</h3>
+          <p>Genera presupuestos, crea plantillas y organiza documentos comerciales con un flujo mucho más ágil.</p>
+        </article>
+
+        <article class="service">
+          <div class="icon">04</div>
+          <h3>Web y contenidos</h3>
+          <p>Actualiza textos, servicios y bloques de tu web sin depender de terceros ni perder tiempo en cambios pequeños.</p>
+        </article>
+
+        <article class="service">
+          <div class="icon">05</div>
+          <h3>Automatización de tareas</h3>
+          <p>Respuestas, recordatorios, clasificaciones, seguimiento de clientes y procesos internos más ligeros y ordenados.</p>
+        </article>
+
+        <article class="service">
+          <div class="icon">06</div>
+          <h3>Soporte y evolución</h3>
+          <p>Te acompañamos para que el sistema crezca contigo y siga sirviendo conforme tu negocio necesite más cosas.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="empleado">
+      <div class="section-title">
+        <h2>El empleado IA que trabaja contigo, no en tu contra</h2>
+        <p>La idea es sencilla: hablarle al sistema como si fuera alguien de tu equipo y dejar que se encargue del trabajo mecánico.</p>
+      </div>
+
+      <div class="split">
+        <div class="panel-card">
+          <h3 style="margin:0 0 14px;font-size:22px;letter-spacing:-.03em;">Qué hace por ti</h3>
+          <div class="checklist">
+            <div class="check"><span class="mark">✓</span><span>Prepara presupuestos rápidos con tono profesional y adaptados a tu negocio.</span></div>
+            <div class="check"><span class="mark">✓</span><span>Redacta emails y respuestas para clientes sin sonar robótico.</span></div>
+            <div class="check"><span class="mark">✓</span><span>Organiza información, documentos y tareas sin que tengas que saltar entre mil herramientas.</span></div>
+            <div class="check"><span class="mark">✓</span><span>Ayuda con cambios de web y contenidos para que no dependas de nadie cada vez que quieras tocar algo.</span></div>
+            <div class="check"><span class="mark">✓</span><span>Se adapta a tu forma de trabajar y a lo que realmente usas en el día a día.</span></div>
+          </div>
+          <div class="quote">
+            <strong>La promesa es clara:</strong> menos tiempo perdido, más control y una forma mucho más simple de gestionar el negocio.
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <h3 style="margin:0 0 14px;font-size:22px;letter-spacing:-.03em;">Todo desde un entorno limpio</h3>
+          <div class="quote" style="margin-top:0">
+            Interfaz tipo chat con pestañas para cada bloque del negocio:
+            <strong>presupuestos, web, clientes, documentos y automatizaciones</strong>.
+          </div>
+          <div class="mini-grid" style="margin-top:16px">
+            <div class="mini-card">
+              <h4>Pestaña web</h4>
+              <p>Editar textos, servicios o CTA sin perderte.</p>
+            </div>
+            <div class="mini-card">
+              <h4>Pestaña presupuestos</h4>
+              <p>Generar propuestas en minutos.</p>
+            </div>
+            <div class="mini-card">
+              <h4>Pestaña clientes</h4>
+              <p>Respuestas y seguimiento más claros.</p>
+            </div>
+            <div class="mini-card">
+              <h4>Pestaña facturas</h4>
+              <p>Documentación y orden sin caos.</p>
+            </div>
+          </div>
+          <div style="margin-top:16px;padding:16px 18px;border-radius:20px;background:rgba(225,6,0,.12);border:1px solid rgba(225,6,0,.22);color:#fff;line-height:1.65">
+            Todo con estética limpia y premium para que transmita confianza.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="mision" class="mission">
+      <div class="section-title">
+        <h2>Nuestra misión</h2>
+        <p>Dar tecnología útil, clara y sin humo. Acompañarte con una solución que de verdad te ayude a trabajar mejor.</p>
+      </div>
+
+      <div class="panel-card">
+        <p>
+          En BLOQUE8 nos tomamos muy en serio algo que para muchos parece pequeño: tu negocio necesita herramientas que te ahorren tiempo
+          y te simplifiquen el día a día. No queremos venderte “más tecnología” por venderte algo. Queremos que abras la web, entiendas
+          rápido qué hace el sistema y veas por qué te puede ayudar a vender, responder y organizarte mejor.
+          Apostamos por una experiencia limpia, directa y elegante, con el detalle en rojo como parte de la identidad visual.
+          Todo pensado para que el primer impacto sea de profesionalidad y el segundo, de claridad.
+        </p>
+      </div>
+    </section>
+
+    <section id="como-funciona">
+      <div class="section-title">
+        <h2>Cómo funciona</h2>
+        <p>Un proceso sencillo para que no tengas que pelearte con la parte técnica ni perder tiempo en configuraciones raras.</p>
+      </div>
+
+      <div class="steps">
+        <article class="step">
+          <div class="num">Paso 1</div>
+          <h3>Nos cuentas tu negocio</h3>
+          <p>Vemos qué tareas te quitan más tiempo y qué procesos conviene automatizar primero.</p>
+        </article>
+        <article class="step">
+          <div class="num">Paso 2</div>
+          <h3>Te lo adaptamos</h3>
+          <p>Configuramos el sistema para que encaje con tu forma de trabajar, tus servicios y tu comunicación.</p>
+        </article>
+        <article class="step">
+          <div class="num">Paso 3</div>
+          <h3>Empiezas a usarlo</h3>
+          <p>Tu empleado IA entra en funcionamiento y lo vas afinando sobre la marcha según el uso real.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="panel-card">
+        <div>
+          <h2>¿Quieres ver una demo y valorar si te encaja?</h2>
+          <p>
+            Estamos cerrando pocas plazas de inicio para trabajar con empresas que quieran ir más rápido, quitar carga operativa y
+            tener una solución clara, bonita y útil.
+          </p>
+        </div>
+        <div class="cta-actions">
+          <a class="btn btn-primary" href="https://wa.me/34667123558" target="_blank" rel="noopener">Abrir WhatsApp</a>
+          <a class="btn btn-ghost" href="tel:+34667123558">Llamar ahora</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-inner">
+        <div><strong style="color:#fff">BLOQUE8</strong> — empleado IA para autónomos y pequeñas empresas.</div>
+        <div>© 2026 · bloque8.com</div>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>
